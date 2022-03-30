@@ -72,31 +72,41 @@ public class CourseDaoImpl implements CourseDao {
             preparedStatement.execute();
             close(preparedStatement);
 
-            String readQuery = "SELECT * FROM tb_courses AS c " +
+            String readQuery = "SELECT c.id AS course_id, c.name, c.price, c.date_created AS course_dc, " +
+            "f.id AS format_id, f.course_format, f.course_duration_weeks, f.lesson_duration, " +
+                    "f.lessons_per_week, f.is_online, f.date_created AS format_dc " +
+                    "FROM tb_courses AS c " +
+                    "JOIN tb_course_format AS f " +
+                    "ON c.course_format_id = f.id " +
+                    ";";
+
+
+                    /*
+                    "SELECT c.id AS courses_id FROM tb_courses AS c " +
                     "JOIN tb_course_format AS f " +
                     "ON c.course_format_id = f.id " +
                     "ORDER BY c.id DESC LIMIT 1;";
-
+*/
             preparedStatement = connection.prepareStatement(readQuery);
 
             resultSet = preparedStatement.executeQuery();
             resultSet.next();
 
             savedCourseFormat = new CourseFormat();
-            savedCourseFormat.setId(resultSet.getLong("f.id"));
+            savedCourseFormat.setId(resultSet.getLong("format_id"));
             savedCourseFormat.setFormat(resultSet.getString("course_format"));
             savedCourseFormat.setCourseDurationWeeks(resultSet.getInt("course_duration_weeks"));
             savedCourseFormat.setLessonDuration(resultSet.getTime("lesson_duration").toLocalTime());
             savedCourseFormat.setLessonPerWeek(resultSet.getInt("lessons_per_week"));
             savedCourseFormat.setOnline(resultSet.getBoolean("is_online"));
-            savedCourseFormat.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+            savedCourseFormat.setDateCreated(resultSet.getTimestamp("format_dc").toLocalDateTime());
 
             savedCourse = new Course();
-            savedCourse.setId(resultSet.getLong("c.id"));
+            savedCourse.setId(resultSet.getLong("course_id"));
             savedCourse.setName(resultSet.getString("name"));
             savedCourse.setPrice(Double.parseDouble(resultSet.getString("price").replaceAll("[^\\d\\.]+", "")) / 100);
             savedCourse.setCourseFormat(savedCourseFormat);
-            savedCourse.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+            savedCourse.setDateCreated(resultSet.getTimestamp("course_dc").toLocalDateTime());
 
         } catch (SQLException e) {
             Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClass().getSimpleName(), e.getMessage());
@@ -122,7 +132,10 @@ public class CourseDaoImpl implements CourseDao {
             connection = getConnection();
             Log.info(this.getClass().getSimpleName(), Connection.class.getSimpleName(), " connection succeeded.");
 
-            String readQuery = "SELECT * FROM tb_courses AS c " +
+            String readQuery = "SELECT c.id AS course_id, c.name, c.price, c.date_created AS course_dc, " +
+                    "f.id AS format_id, f.course_format, f.course_duration_weeks, f.lesson_duration, " +
+                    "f.lessons_per_week, f.is_online, f.date_created AS format_dc " +
+                    "FROM tb_courses AS c " +
                     "JOIN tb_course_format AS f " +
                     "ON c.course_format_id = f.id " +
                     "WHERE c.id = ?;";
@@ -134,20 +147,20 @@ public class CourseDaoImpl implements CourseDao {
             resultSet.next();
 
             courseFormat = new CourseFormat();
-            courseFormat.setId(resultSet.getLong("course_format_id"));
+            courseFormat.setId(resultSet.getLong("format_id"));
             courseFormat.setFormat(resultSet.getString("course_format"));
             courseFormat.setCourseDurationWeeks(resultSet.getInt("course_duration_weeks"));
             courseFormat.setLessonDuration(resultSet.getTime("lesson_duration").toLocalTime());
             courseFormat.setLessonPerWeek(resultSet.getInt("lessons_per_week"));
             courseFormat.setOnline(resultSet.getBoolean("is_online"));
-            courseFormat.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+            courseFormat.setDateCreated(resultSet.getTimestamp("format_dc").toLocalDateTime());
 
             course = new Course();
-            course.setId(resultSet.getLong("id"));
+            course.setId(resultSet.getLong("course_id"));
             course.setName(resultSet.getString("name"));
             course.setPrice(Double.parseDouble(resultSet.getString("price").replaceAll("[^\\d\\.]+", "")) / 100);
             course.setCourseFormat(courseFormat);
-            course.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+            course.setDateCreated(resultSet.getTimestamp("course_dc").toLocalDateTime());
 
         } catch (SQLException e) {
             Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClass().getSimpleName(), e.getMessage());

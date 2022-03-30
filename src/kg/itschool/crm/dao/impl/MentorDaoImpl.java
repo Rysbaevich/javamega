@@ -67,7 +67,7 @@ public class MentorDaoImpl implements MentorDao {
             preparedStatement.setString(1, mentor.getLastName());
             preparedStatement.setString(2, mentor.getFirstName());
             preparedStatement.setString(3, mentor.getPhoneNumber());
-            preparedStatement.setString(4, mentor.getSalary() + "");
+            preparedStatement.setString(4, (mentor.getSalary() + "").replace(".", ","));
             preparedStatement.setTimestamp(5, Timestamp.valueOf(mentor.getDateCreated()));
             preparedStatement.setDate(6, Date.valueOf(mentor.getDob()));
             preparedStatement.setString(7, mentor.getEmail());
@@ -88,7 +88,7 @@ public class MentorDaoImpl implements MentorDao {
             savedMentor.setLastName(resultSet.getString("last_name"));
             savedMentor.setEmail(resultSet.getString("email"));
             savedMentor.setPhoneNumber(resultSet.getString("phone_number"));
-            savedMentor.setSalary(Double.valueOf(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")));
+            savedMentor.setSalary(Double.parseDouble(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")) / 100);
             savedMentor.setDob(resultSet.getDate("dob").toLocalDate());
             savedMentor.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
 
@@ -131,7 +131,7 @@ public class MentorDaoImpl implements MentorDao {
             mentor.setLastName(resultSet.getString("last_name"));
             mentor.setEmail(resultSet.getString("email"));
             mentor.setPhoneNumber(resultSet.getString("phone_number"));
-            mentor.setSalary(Double.valueOf(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")));
+            mentor.setSalary(Double.parseDouble(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")) / 100);
             mentor.setDob(resultSet.getDate("dob").toLocalDate());
             mentor.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
 

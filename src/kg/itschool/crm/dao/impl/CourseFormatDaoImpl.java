@@ -67,7 +67,7 @@ public class CourseFormatDaoImpl implements CourseFormatDao {
             preparedStatement = connection.prepareStatement(createQuery);
             preparedStatement.setString(1, courseFormat.getFormat());
             preparedStatement.setInt(2, courseFormat.getCourseDurationWeeks());
-            preparedStatement.setTime(3, Time.valueOf((courseFormat.getLessonDuration())));
+            preparedStatement.setTime(3, Time.valueOf(courseFormat.getLessonDuration()));
             preparedStatement.setInt(4, courseFormat.getLessonPerWeek());
             preparedStatement.setBoolean(5, courseFormat.isOnline());
             preparedStatement.setTimestamp(6, Timestamp.valueOf(courseFormat.getDateCreated()));

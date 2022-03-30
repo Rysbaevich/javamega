@@ -4,9 +4,10 @@ import kg.itschool.crm.dao.*;
 import kg.itschool.crm.dao.daoutil.DaoFactory;
 import kg.itschool.crm.dao.impl.CourseDaoImpl;
 import kg.itschool.crm.dao.impl.CourseFormatDaoImpl;
-import kg.itschool.crm.model.Course;
-import kg.itschool.crm.model.CourseFormat;
-import kg.itschool.crm.model.Manager;
+import kg.itschool.crm.dao.impl.GroupDaoImpl;
+import kg.itschool.crm.dao.impl.MentorDaoImpl;
+import kg.itschool.crm.model.*;
+import sun.security.acl.GroupImpl;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,10 +15,11 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
+//        allMentors();
 //        allCourseFormats();
 //        allCourses();
-//        CourseDaoImpl courseDao = new CourseDaoImpl();
-//        System.out.println(courseDao.findById(1L));
+//        allManagers();
+        allGroups();
     }
 
     public static void allManagers() {
@@ -50,6 +52,39 @@ public class Main {
         System.out.println("From database: " + managerDao.save(manager));
 
         System.out.println(managerDao.findById(1L));
+    }
+    public static void allMentors() {
+        Mentor mentor = new Mentor();
+
+
+        Scanner scan = new Scanner(System.in);
+
+        System.out.print("First name: ");
+        mentor.setFirstName(scan.nextLine());
+
+        System.out.print("Last name: ");
+        mentor.setLastName(scan.nextLine());
+
+        System.out.print("Email: ");
+        mentor.setEmail(scan.nextLine());
+
+        System.out.print("Phone number: ");
+        mentor.setPhoneNumber(scan.nextLine());
+
+        System.out.print("Date of birth: ");
+        mentor.setDob(LocalDate.parse(scan.nextLine())); // yyyy-MM-dd
+
+        System.out.print("Salary: ");
+        mentor.setSalary(scan.nextDouble());
+
+        System.out.println("Input: " + mentor);
+
+
+        MentorDao mentorDao = DaoFactory.getMentorDaoSQL();
+
+        System.out.println("From database: " + mentorDao.save(mentor));
+
+//        System.out.println(mentorDao.findById(1L));
     }
     public static void allCourseFormats() {
         CourseFormat courseFormat = new CourseFormat();
@@ -86,6 +121,7 @@ public class Main {
 
         Course course = new Course();
         CourseFormatDaoImpl courseFormatDaoImpl = new CourseFormatDaoImpl();
+/*
         Scanner scan = new Scanner(System.in);
 
         System.out.print("Name: ");
@@ -100,12 +136,52 @@ public class Main {
         course.setCourseFormat(courseFormat);
 
         System.out.println("Input: " + course);
+*/
 
         CourseDao courseDao = DaoFactory.getCourseDaoSQL();
 
 //        System.out.println("From database: " + courseDao.save(course));
 
+        System.out.println(courseDao.findById(3L));
+    }
+    public static void allGroups() {
 
-        System.out.println(courseDao.findById(1L));
+        Scanner scan = new Scanner(System.in);
+
+        Group group = new Group();
+        CourseDaoImpl courseDaoImpl = new CourseDaoImpl();
+        MentorDaoImpl mentorDaoImpl = new MentorDaoImpl();
+
+        System.out.print("Groups name: ");
+        group.setName(scan.nextLine());
+
+        System.out.print("Group time(hour 'click enter' then minute 'click enter'): ");
+        group.setGroupTime(LocalTime.of(scan.nextInt(), scan.nextInt()));
+
+        System.out.println("Courses:");
+        System.out.println("1 - Java");
+        System.out.println("2 - Flutter");
+        System.out.println("3 - Python");
+        System.out.println();
+        System.out.println("Course(id): ");
+        Course course = courseDaoImpl.findById(scan.nextLong());
+        group.setCourse(course);
+
+        System.out.println("Mentors: ");
+        System.out.println("1 - Nodir");
+        System.out.println("2 - Jyldyzbek");
+        System.out.println();
+        System.out.print("Mentor(id): ");
+
+        Mentor mentor = mentorDaoImpl.findById(scan.nextLong());
+        group.setMentor(mentor);
+
+        System.out.println("Input: " + group);
+
+        GroupDao groupDao = DaoFactory.getGroupDaoSQL();
+
+        System.out.println("From database: " + groupDao.save(group));
+
+//        System.out.println(groupDao.findById(2L));
     }
 }
