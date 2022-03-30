@@ -83,7 +83,7 @@ public class Main {
 //        System.out.println(courseFormatDao.findById(1L));
     }
     public static void allCourses() {
-/*
+
         Course course = new Course();
         CourseFormatDaoImpl courseFormatDaoImpl = new CourseFormatDaoImpl();
         Scanner scan = new Scanner(System.in);
@@ -100,7 +100,7 @@ public class Main {
         course.setCourseFormat(courseFormat);
 
         System.out.println("Input: " + course);
-*/
+
         CourseDao courseDao = DaoFactory.getCourseDaoSQL();
 
 //        System.out.println("From database: " + courseDao.save(course));

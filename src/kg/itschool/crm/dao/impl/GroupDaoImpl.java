@@ -82,7 +82,7 @@ public class GroupDaoImpl implements GroupDao {
 
             String readQuery = "SELECT * FROM tb_groups AS g " +
                     "JOIN tb_courses AS c " +
-                    "ON g.group_id = c.id " +
+                    "ON g.courses_id = c.id " +
                     "JOIN tb_mentors AS m " +
                     "ON g.group_id = m.id " +
                     "ORDER BY id DESC LIMIT 1";
