@@ -3,9 +3,12 @@ package kg.itschool.crm.dao.impl;
 import kg.itschool.crm.dao.CourseFormatDao;
 import kg.itschool.crm.dao.daoutil.Log;
 import kg.itschool.crm.model.CourseFormat;
+import kg.itschool.crm.model.Mentor;
 
 import java.sql.*;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CourseFormatDaoImpl implements CourseFormatDao {
 
@@ -124,7 +127,6 @@ public class CourseFormatDaoImpl implements CourseFormatDao {
             resultSet.next();
 
             courseFormat = new CourseFormat();
-
             courseFormat.setId(resultSet.getLong("id"));
             courseFormat.setFormat(resultSet.getString("course_format"));
             courseFormat.setCourseDurationWeeks(resultSet.getInt("course_duration_weeks"));
@@ -142,5 +144,44 @@ public class CourseFormatDaoImpl implements CourseFormatDao {
             close(connection);
         }
             return courseFormat;
+    }
+
+    @Override
+    public List<CourseFormat> findAll() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<CourseFormat> courseFormats = new ArrayList<>();
+
+        try {
+            Log.info(this.getClass().getSimpleName() + " findAll()", Connection.class.getSimpleName(), "Establishing connection");
+            connection = getConnection();
+
+            String readQuery = "SELECT * FROM tb_course_format";
+
+            preparedStatement = connection.prepareStatement(readQuery);
+
+            resultSet = preparedStatement.executeQuery();
+
+            for (int i = 0; i <= courseFormats.size() && resultSet.next(); i++) {
+                CourseFormat courseFormat = new CourseFormat();
+                courseFormat.setId(resultSet.getLong("id"));
+                courseFormat.setFormat(resultSet.getString("course_format"));
+                courseFormat.setCourseDurationWeeks(resultSet.getInt("course_duration_weeks"));
+                courseFormat.setLessonDuration(LocalTime.parse(resultSet.getString("lesson_duration")));
+                courseFormat.setLessonPerWeek(resultSet.getInt("lessons_per_week"));
+                courseFormat.setOnline(resultSet.getBoolean("is_online"));
+                courseFormat.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+                courseFormats.add(courseFormat);
+            }
+        } catch (Exception e) {
+            Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClassName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
+        }
+        return courseFormats;
     }
 }

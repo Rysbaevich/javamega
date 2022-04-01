@@ -5,6 +5,8 @@ import kg.itschool.crm.dao.daoutil.Log;
 import kg.itschool.crm.model.Manager;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ManagerDaoImpl implements ManagerDao {
 
@@ -93,7 +95,7 @@ public class ManagerDaoImpl implements ManagerDao {
             savedManager.setDob(resultSet.getDate("dob").toLocalDate());
             savedManager.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClass().getSimpleName(), e.getMessage());
             e.printStackTrace();
         } finally {
@@ -132,7 +134,7 @@ public class ManagerDaoImpl implements ManagerDao {
             manager.setLastName(resultSet.getString("last_name"));
             manager.setEmail(resultSet.getString("email"));
             manager.setPhoneNumber(resultSet.getString("phone_number"));
-            manager.setSalary(Double.valueOf(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")));
+            manager.setSalary(Double.valueOf(resultSet.getString("salary").replaceAll("[^\\d\\.]+", "")));
             manager.setDob(resultSet.getDate("dob").toLocalDate());
             manager.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
 
@@ -147,5 +149,45 @@ public class ManagerDaoImpl implements ManagerDao {
             close(connection);
         }
         return manager;
+    }
+
+    @Override
+    public List<Manager> findAll() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Manager> managers = new ArrayList<>();
+
+        try {
+            Log.info(this.getClass().getSimpleName() + " findAll()", Connection.class.getSimpleName(), "Establishing connection");
+            connection = getConnection();
+
+            String readQuery = "SELECT * FROM tb_managers";
+
+            preparedStatement = connection.prepareStatement(readQuery);
+
+            resultSet = preparedStatement.executeQuery();
+
+            for (int i = 0; i <= managers.size() && resultSet.next(); i++) {
+                Manager manager = new Manager();
+                manager.setId(resultSet.getLong("id"));
+                manager.setFirstName(resultSet.getString("first_name"));
+                manager.setLastName(resultSet.getString("last_name"));
+                manager.setEmail(resultSet.getString("email"));
+                manager.setPhoneNumber(resultSet.getString("phone_number"));
+                manager.setSalary(Double.valueOf(resultSet.getString("salary").replaceAll("[^\\d\\.]+", "")));
+                manager.setDob(resultSet.getDate("dob").toLocalDate());
+                manager.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+                managers.add(manager);
+            }
+        } catch (Exception e) {
+            Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClassName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
+        }
+        return managers;
     }
 }

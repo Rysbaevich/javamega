@@ -2,9 +2,12 @@ package kg.itschool.crm.dao.impl;
 
 import kg.itschool.crm.dao.MentorDao;
 import kg.itschool.crm.dao.daoutil.Log;
+import kg.itschool.crm.model.Manager;
 import kg.itschool.crm.model.Mentor;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MentorDaoImpl implements MentorDao {
 
@@ -146,5 +149,45 @@ public class MentorDaoImpl implements MentorDao {
             close(connection);
         }
         return mentor;
+    }
+
+    @Override
+    public List<Mentor> findAll() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Mentor> mentors = new ArrayList<>();
+
+        try {
+            Log.info(this.getClass().getSimpleName() + " findAll()", Connection.class.getSimpleName(), "Establishing connection");
+            connection = getConnection();
+
+            String readQuery = "SELECT * FROM tb_mentors";
+
+            preparedStatement = connection.prepareStatement(readQuery);
+
+            resultSet = preparedStatement.executeQuery();
+
+            for (int i = 0; i <= mentors.size() && resultSet.next(); i++) {
+                Mentor mentor = new Mentor();
+                mentor.setId(resultSet.getLong("id"));
+                mentor.setFirstName(resultSet.getString("first_name"));
+                mentor.setLastName(resultSet.getString("last_name"));
+                mentor.setEmail(resultSet.getString("email"));
+                mentor.setPhoneNumber(resultSet.getString("phone_number"));
+                mentor.setSalary(Double.parseDouble(resultSet.getString("salary").replaceAll("[^\\d\\.]", "")) / 100);
+                mentor.setDob(resultSet.getDate("dob").toLocalDate());
+                mentor.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+                mentors.add(mentor);
+            }
+        } catch (Exception e) {
+            Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClassName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
+        }
+        return mentors;
     }
 }

@@ -6,6 +6,9 @@ import kg.itschool.crm.model.Course;
 import kg.itschool.crm.model.CourseFormat;
 
 import java.sql.*;
+import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CourseDaoImpl implements CourseDao {
 
@@ -80,13 +83,6 @@ public class CourseDaoImpl implements CourseDao {
                     "ON c.course_format_id = f.id " +
                     ";";
 
-
-                    /*
-                    "SELECT c.id AS courses_id FROM tb_courses AS c " +
-                    "JOIN tb_course_format AS f " +
-                    "ON c.course_format_id = f.id " +
-                    "ORDER BY c.id DESC LIMIT 1;";
-*/
             preparedStatement = connection.prepareStatement(readQuery);
 
             resultSet = preparedStatement.executeQuery();
@@ -171,5 +167,58 @@ public class CourseDaoImpl implements CourseDao {
             close(connection);
         }
         return course;
+    }
+
+    @Override
+    public List<Course> findAll() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Course> courses = new ArrayList<>();
+
+        try {
+            Log.info(this.getClass().getSimpleName() + " findAll()", Connection.class.getSimpleName(), "Establishing connection");
+            connection = getConnection();
+
+            String readQuery = "SELECT c.id AS course_id, c.name, c.price, c.date_created AS course_dc, " +
+                    "f.id AS format_id, f.course_format, f.course_duration_weeks, f.lesson_duration, " +
+                    "f.lessons_per_week, f.is_online, f.date_created AS format_dc " +
+                    "FROM tb_courses AS c " +
+                    "JOIN tb_course_format AS f " +
+                    "ON c.course_format_id = f.id " +
+                    ";";
+
+            preparedStatement = connection.prepareStatement(readQuery);
+
+            resultSet = preparedStatement.executeQuery();
+
+            for (int i = 0; i <= courses.size() && resultSet.next(); i++) {
+
+                CourseFormat courseFormat = new CourseFormat();
+                courseFormat.setId(resultSet.getLong("format_id"));
+                courseFormat.setFormat(resultSet.getString("course_format"));
+                courseFormat.setCourseDurationWeeks(resultSet.getInt("course_duration_weeks"));
+                courseFormat.setLessonDuration(resultSet.getTime("lesson_duration").toLocalTime());
+                courseFormat.setLessonPerWeek(resultSet.getInt("lessons_per_week"));
+                courseFormat.setOnline(resultSet.getBoolean("is_online"));
+                courseFormat.setDateCreated(resultSet.getTimestamp("format_dc").toLocalDateTime());
+
+                Course course = new Course();
+                course.setId(resultSet.getLong("course_id"));
+                course.setName(resultSet.getString("name"));
+                course.setPrice(Double.parseDouble(resultSet.getString("price").replaceAll("[^\\d\\.]+", "")) / 100);
+                course.setCourseFormat(courseFormat);
+                course.setDateCreated(resultSet.getTimestamp("course_dc").toLocalDateTime());
+                courses.add(course);
+            }
+        } catch (Exception e) {
+            Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClassName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
+        }
+        return courses;
     }
 }

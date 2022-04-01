@@ -2,9 +2,12 @@ package kg.itschool.crm.dao.impl;
 
 import kg.itschool.crm.dao.StudentDao;
 import kg.itschool.crm.dao.daoutil.Log;
+import kg.itschool.crm.model.Mentor;
 import kg.itschool.crm.model.Student;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class StudentDaoImpl implements StudentDao {
 
@@ -141,5 +144,44 @@ public class StudentDaoImpl implements StudentDao {
             close(connection);
         }
         return student;
+    }
+
+    @Override
+    public List<Student> findAll() {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        List<Student> students = new ArrayList<>();
+
+        try {
+            Log.info(this.getClass().getSimpleName() + " findAll()", Connection.class.getSimpleName(), "Establishing connection");
+            connection = getConnection();
+
+            String readQuery = "SELECT * FROM tb_students";
+
+            preparedStatement = connection.prepareStatement(readQuery);
+
+            resultSet = preparedStatement.executeQuery();
+
+            for (int i = 0; i <= students.size() && resultSet.next(); i++) {
+                Student student = new Student();
+                student.setId(resultSet.getLong("id"));
+                student.setFirstName(resultSet.getString("first_name"));
+                student.setLastName(resultSet.getString("last_name"));
+                student.setEmail(resultSet.getString("email"));
+                student.setPhoneNumber(resultSet.getString("phone_number"));
+                student.setDob(resultSet.getDate("dob").toLocalDate());
+                student.setDateCreated(resultSet.getTimestamp("date_created").toLocalDateTime());
+                students.add(student);
+            }
+        } catch (Exception e) {
+            Log.error(this.getClass().getSimpleName(), e.getStackTrace()[0].getClassName(), e.getMessage());
+            e.printStackTrace();
+        } finally {
+            close(resultSet);
+            close(preparedStatement);
+            close(connection);
+        }
+        return students;
     }
 }
